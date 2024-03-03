@@ -1,2 +1,50 @@
 ---
 # tasks file for atb-ansible-winvulnserver
+- name: Create scheduled task which runs as a privileged user
+  community.windows.win_scheduled_task:
+    name: WriteLog
+    description: This task will use a ps script to enrich some logs with unnecessary data
+    actions:
+      - path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+        arguments: -ExecutionPolicy ByPass -NonInteractive -File C:\ProgramData\WriteLog.ps1
+    triggers:
+      - type: daily
+        start_boundary: "2023-12-17T00:00:00"
+      - type: logon
+    username: "{{ admin_user }}"
+    password: "{{ admin_password }}"
+    logon_type: password
+    run_level: highest
+    state: present
+    enabled: true
+
+# Create the PS1 file which will be used by the task
+- name: Create the script which will be utilized by the task via Powershell
+  ansible.windows.win_powershell:
+    script: |
+      New-Item -Path "C:\ProgramData\" -Name "WriteLog.ps1" -ItemType File -Force
+      Set-Content -Path "C:\ProgramData\WriteLog.ps1" -Value "Get-Date | Add-Content -Path C:\Temp\log.txt `n
+        ipconfig | Add-Content -Path C:\Temp\log.txt"
+
+- name: Modify permissions for the file
+  ansible.windows.win_acl:
+    path: C:\ProgramData\WriteLog.ps1
+    user: Domain Users
+    rights: FullControl
+    type: allow
+    state: present
+
+# Edit user rights so Domain Users can run the scheduled task
+- name: Set security descriptor for the created task
+  ansible.windows.win_powershell:
+    script: |
+      $Scheduler = New-Object -ComObject "Schedule.Service"
+      $Scheduler.Connect()
+      $GetTask = $Scheduler.GetFolder('\').GetTask("WriteLog")
+
+      $GetSecurityDescriptor = $GetTask.GetSecurityDescriptor(0xF)
+
+      if ($GetSecurityDescriptor -notmatch 'A;;0x1200a9;;;AU') {
+          $GetSecurityDescriptor = $GetSecurityDescriptor + '(A;;GRGX;;;AU)'
+          $GetTask.SetSecurityDescriptor($GetSecurityDescriptor, 0)
+      }
