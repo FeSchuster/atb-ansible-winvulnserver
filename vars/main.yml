@@ -1,2 +1,4 @@
 ---
 # vars file for atb-ansible-winvulnserver
+admin_user: "wsadm"
+admin_password: "Root.PW1"
