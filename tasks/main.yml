@@ -48,3 +48,16 @@
           $GetSecurityDescriptor = $GetSecurityDescriptor + '(A;;GRGX;;;AU)'
           $GetTask.SetSecurityDescriptor($GetSecurityDescriptor, 0)
       }
+
+  # Add User Alice to the local groups remotedesktopuser and remotemanagementuser
+- name: Add User Alice to local group remotedesktopuser
+  ansible.windows.win_group_membership:
+    name: remotedesktopuser
+    members: {{ compromised_user }}
+    state: present
+
+- name: Add User Alice to local group remotemanagementuser
+  ansible.windows.win_group_membership:
+    name: remotemanagementuser
+    members: {{ compromised_user }}
+    state: present
