@@ -15,6 +15,12 @@
     type: allow
     state: present
 
+- name: Set User Fact
+  ansible.builtin.set_fact:
+    ansible_user: "{{ admin_user }}"
+    ansible_password: "{{ admin_password }}"
+    ansible_winrm_transport: ntlm
+
 # tasks file for atb-ansible-winvulnserver
 - name: Create scheduled task which runs as a privileged user
   community.windows.win_scheduled_task:
@@ -50,14 +56,14 @@
       }
 
   # Add User Alice to the local groups remotedesktopuser and remotemanagementuser
-- name: Add User Alice to local group remotedesktopuser
+- name: Add compromised_user to local group remotedesktopuser
   ansible.windows.win_group_membership:
-    name: remotedesktopuser
-    members: {{ compromised_user }}
+    name: Remote Desktop Users
+    members: '{{ compromised_user }}'
     state: present
 
-- name: Add User Alice to local group remotemanagementuser
+- name: Add compromised_user to local group remotemanagementuser
   ansible.windows.win_group_membership:
-    name: remotemanagementuser
-    members: {{ compromised_user }}
+    name: Remote Management Users
+    members: '{{ compromised_user }}'
     state: present
