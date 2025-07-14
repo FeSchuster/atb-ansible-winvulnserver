@@ -1,5 +1,5 @@
 ---
 # defaults file for atb-ansible-winvulnserver
-# admin_user: "Placeholder"
-# admin_password: "Placeholder"
-# compromised_user: "Placeholder"
+admin_user: "AnyAdminUser"
+admin_password: "SuperSecurePW.2!"
+compromised_user: "Alice"

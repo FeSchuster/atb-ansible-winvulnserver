@@ -1,5 +1,2 @@
 ---
 # vars file for atb-ansible-winvulnserver
-admin_user: "AnyAdminUser"
-admin_password: "SuperSecurePW.2!"
-compromised_user: "Alice"
