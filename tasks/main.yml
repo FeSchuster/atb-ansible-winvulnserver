@@ -1,4 +1,11 @@
 ---
+- name: Add {{ compromised_user }} to local admins
+  ansible.windows.win_group_membership:
+      name: Administrators
+      members:
+        - "{{ compromised_user }}"
+      state: present
+
 # Create the PS1 file which will be used by the task
 - name: Create the script which will be utilized by the task via Powershell
   ansible.windows.win_powershell:
